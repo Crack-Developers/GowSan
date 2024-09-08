@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import emailjs from '@emailjs/browser';
 import { IoCloseOutline } from "react-icons/io5";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Popup = ({ orderPopup, setOrderPopup }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(false); // State to track validation errors
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(name, email, message);
+    
+    // Check if any fields are empty
+    if (!name || !email || !message) {
+      setError(true);
+      toast.error('Please fill in all fields');
+      return;
+    }
 
     const serviceId = 'service_e4u54mx'; // Replace with your EmailJS service ID
     const templateId = 'template_823cbmc'; // Replace with your EmailJS template ID
@@ -25,12 +34,14 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
     emailjs.send(serviceId, templateId, templateParams, userId)
       .then((response) => {
         console.log('Email Sent Successfully', response);
+        toast.success('Your message has been sent successfully');
         setEmail('');
         setName('');
         setMessage('');
       })
       .catch((error) => { 
         console.error('Error Sending Message', error);
+        toast.error('Failed to send the message');
       });
   }
 
@@ -59,22 +70,22 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
                   type="text"
                   placeholder="Name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-2 py-1 mb-4"
+                  onChange={(e) => { setName(e.target.value); setError(false); }}
+                  className={`w-full rounded-full border px-2 py-1 mb-4 ${error && !name ? 'border-red-500' : 'border-gray-300 dark:border-gray-500 dark:bg-gray-800'}`}
                 />
                 <input
                   type="email"
                   placeholder="Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-2 py-1 mb-4"
+                  onChange={(e) => { setEmail(e.target.value); setError(false); }}
+                  className={`w-full rounded-full border px-2 py-1 mb-4 ${error && !email ? 'border-red-500' : 'border-gray-300 dark:border-gray-500 dark:bg-gray-800'}`}
                 />
                 <input
                   type="text"
                   placeholder="Subject"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full rounded-full border border-gray-300 dark:border-gray-500 dark:bg-gray-800 px-2 py-1 mb-4"
+                  onChange={(e) => { setMessage(e.target.value); setError(false); }}
+                  className={`w-full rounded-full border px-2 py-1 mb-4 ${error && !message ? 'border-red-500' : 'border-gray-300 dark:border-gray-500 dark:bg-gray-800'}`}
                 />
                 <div className="flex justify-center">
                   <button onClick={handleSubmit} className="bg-gradient-to-r from-primary to-secondary hover:scale-105 duration-200 text-white py-1 px-4 rounded-full ">
@@ -84,6 +95,8 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
               </div>
             </div>
           </div>
+          {/* Toast notification container */}
+          <ToastContainer />
         </div>
       )}
     </>
